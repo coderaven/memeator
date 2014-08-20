@@ -159,35 +159,21 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
     private BufferedImage textOverlayImageTop(BufferedImage old, String text){
         int w = old.getWidth();
         int h = old.getHeight();
-        
         BufferedImage img = new BufferedImage(
             w, h, BufferedImage.TYPE_INT_ARGB);
         Graphics2D g2d = img.createGraphics();
-        
-        
         g2d.drawImage(old, 0, 0, null);
-        
         g2d.setFont(new Font("Arial", Font.BOLD, 40));
         FontMetrics fm = g2d.getFontMetrics();
         
-        int x = 0;
-        int y = fm.getHeight();
-        
-        int stringLen = (int)  g2d.getFontMetrics().getStringBounds(text, g2d).getWidth();  
-        int start = 250 - stringLen/2;
-
-        g2d.setColor(Color.black);
-        g2d.drawString(text, start + ShiftWest(x, 1), ShiftNorth(y, 1));
-        g2d.drawString(text, start + ShiftWest(x, 1), ShiftSouth(y, 1));
-        g2d.drawString(text, start + ShiftEast(x, 1), ShiftNorth(y, 1));
-        g2d.drawString(text, start + ShiftEast(x, 1), ShiftSouth(y, 1));
-        g2d.setColor(Color.white);
-        g2d.drawString(text, start + x, y);
-        g2d.dispose();
-        return img;
+        return textOverlay(old,text,0,fm.getHeight());
     }
     
     private BufferedImage textOverlayImageBottom(BufferedImage old, String text){
+        return textOverlay(old,text,0,370);
+    }
+    
+    private BufferedImage textOverlay(BufferedImage old, String text, int x, int y){
         int w = old.getWidth();
         int h = old.getHeight();
         
@@ -200,9 +186,6 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
         
         g2d.setFont(new Font("Arial", Font.BOLD, 40));
         FontMetrics fm = g2d.getFontMetrics();
-        
-        int x = 0;
-        int y = 370;
         
         int stringLen = (int)  g2d.getFontMetrics().getStringBounds(text, g2d).getWidth();  
         int start = 250 - stringLen/2;
@@ -277,6 +260,8 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
             setImage("drop.jpg");
             setTopText("");
             setBottomText("");
+            topTextFieldHolder.setText("");
+            bottomTextFieldHolder.setText("");
         } else if (e.getSource() == saveButtonHolder){
             JFileChooser fileChooser = new JFileChooser();
             javax.swing.filechooser.FileFilter ff = new javax.swing.filechooser.FileFilter() {
@@ -299,6 +284,7 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
                     ImageIO.write(imageToDraw, "png", outputfile);
                     JOptionPane.showMessageDialog(null, "File Successfully Saved!");
                 } catch (IOException ex) {
+                    JOptionPane.showMessageDialog(null, "Error Occured! File not saved. Please try again!");
                 }
             }
         }
