@@ -25,13 +25,8 @@ import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
-import java.awt.image.ImageFilter;
 import java.io.File;
-import java.io.FileFilter;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.imageio.ImageIO;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
@@ -40,7 +35,6 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import sun.awt.image.codec.JPEGImageEncoderImpl;
 
 /**
  *
@@ -76,11 +70,12 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
     private JTextField bottomTextFieldHolder;
     private JButton resetButtonHolder;
     private JButton saveButtonHolder;
+    private JButton[] memeButtonsHolder;
     
     public ImagePanel(){
         enableDragAndDrop();
         try {                
-            image = ImageIO.read(new File("drop.jpg"));
+            image = ImageIO.read(new File("images/drop.jpg"));
             topText = "";
             bottomText = "";
          } catch (IOException ex) {
@@ -88,18 +83,24 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
          }
     }
     
-    public ImagePanel(JTextField topTextField, JTextField bottomTextField, JButton resetButton, JButton saveButton){
+    public ImagePanel(JTextField topTextField, JTextField bottomTextField, JButton resetButton, JButton saveButton, JButton[] memeButtons){
         enableDragAndDrop();
         topTextField.addActionListener(this);
         bottomTextField.addActionListener(this);
         resetButton.addActionListener(this);
         saveButton.addActionListener(this);
         topTextFieldHolder = topTextField;
-        bottomTextFieldHolder = bottomTextField;
+        bottomTextFieldHolder = bottomTextField;;
         resetButtonHolder = resetButton;
         saveButtonHolder = saveButton;
+        memeButtonsHolder = memeButtons;
+        
+        for (JButton mButton : memeButtons){
+            mButton.addActionListener(this);
+        }
+        
         try {                
-            image = ImageIO.read(new File("drop.jpg"));
+            image = ImageIO.read(new File("images/drop.jpg"));
             topText = "";
             bottomText = "";
          } catch (IOException ex) {
@@ -257,7 +258,7 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
         } else if (e.getSource() == bottomTextFieldHolder){
             setBottomText(bottomTextFieldHolder.getText());
         } else if (e.getSource() == resetButtonHolder){
-            setImage("drop.jpg");
+            setImage("images/drop.jpg");
             setTopText("");
             setBottomText("");
             topTextFieldHolder.setText("");
@@ -287,6 +288,14 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
                     JOptionPane.showMessageDialog(null, "Error Occured! File not saved. Please try again!");
                 }
             }
+        } else {
+            for (JButton mButton : memeButtonsHolder){
+                if (e.getSource() == mButton){
+                    setImage("images/" + mButton.getName() + ".png");
+                }
+            }
         }
+        
     }
+
 }
