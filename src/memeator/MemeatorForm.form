@@ -238,8 +238,20 @@
       </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="topTextField">
+      <Properties>
+        <Property name="autoscrolls" type="boolean" value="false"/>
+        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[14, 28]"/>
+        </Property>
+      </Properties>
     </Component>
     <Component class="javax.swing.JTextField" name="bottomTextField">
+      <Properties>
+        <Property name="autoscrolls" type="boolean" value="false"/>
+        <Property name="maximumSize" type="java.awt.Dimension" editor="org.netbeans.beaninfo.editors.DimensionEditor">
+          <Dimension value="[14, 28]"/>
+        </Property>
+      </Properties>
     </Component>
     <Component class="javax.swing.JButton" name="resetButton">
       <Properties>
