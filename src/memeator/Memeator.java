@@ -64,9 +64,6 @@ public class Memeator extends JFrame implements DropTargetListener {
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
-        new Memeator();
-    }
 
     @Override
     public void dragEnter(DropTargetDragEvent dtde) {
@@ -119,7 +116,7 @@ class ImagePanel extends JPanel {
     
     public ImagePanel(){
         try {                
-            image = ImageIO.read(new File("placeholder.jpeg"));
+            image = ImageIO.read(new File("drop.jpg"));
          } catch (IOException ex) {
               // handle exception...
          }
@@ -157,7 +154,7 @@ class ImagePanel extends JPanel {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         //g.drawImage(image, 0, 0, null); // see javadoc for more info on the parameters ;
-        image = textOverlayImage(toBufferedImage(image.getScaledInstance(500, -1, Image.SCALE_SMOOTH)), "HE HELLO HELLO HELLO");
+        image = textOverlayImage(toBufferedImage(image.getScaledInstance(550, -1, Image.SCALE_SMOOTH)), "Gwapo si Edsil?");
         g.drawImage(image, 0, 0, null);
     }
     
