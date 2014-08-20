@@ -71,6 +71,10 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
     private JButton resetButtonHolder;
     private JButton saveButtonHolder;
     private JButton[] memeButtonsHolder;
+    private JButton[] colorButtonsHolder;
+    private Color topColor;
+    private Color bottomColor;
+    
     
     public ImagePanel(){
         enableDragAndDrop();
@@ -83,7 +87,7 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
          }
     }
     
-    public ImagePanel(JTextField topTextField, JTextField bottomTextField, JButton resetButton, JButton saveButton, JButton[] memeButtons){
+    public ImagePanel(JTextField topTextField, JTextField bottomTextField, JButton resetButton, JButton saveButton, JButton[] memeButtons, JButton[] colorButtons){
         enableDragAndDrop();
         topTextField.addActionListener(this);
         bottomTextField.addActionListener(this);
@@ -94,9 +98,16 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
         resetButtonHolder = resetButton;
         saveButtonHolder = saveButton;
         memeButtonsHolder = memeButtons;
+        colorButtonsHolder = colorButtons;
+        topColor = Color.white;
+        bottomColor = Color.white;
         
         for (JButton mButton : memeButtons){
             mButton.addActionListener(this);
+        }
+        
+        for (JButton cButton: colorButtons){
+            cButton.addActionListener(this);
         }
         
         try {                
@@ -115,6 +126,18 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
               // handle exception...
          }
         
+        this.repaint();
+        this.revalidate();
+    }
+    
+    public void setTopTextColor(Color color){
+        topColor = color;
+        this.repaint();
+        this.revalidate();
+    }
+    
+    public void setBottomTextColor(Color color){
+        bottomColor = color;
         this.repaint();
         this.revalidate();
     }
@@ -152,12 +175,12 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         //g.drawImage(image, 0, 0, null); // see javadoc for more info on the parameters ;
-        imageToDraw = textOverlayImageTop(toBufferedImage(image.getScaledInstance(550, 400, Image.SCALE_SMOOTH)), topText);
-        imageToDraw = textOverlayImageBottom(toBufferedImage(imageToDraw.getScaledInstance(550, 400, Image.SCALE_SMOOTH)), bottomText);
+        imageToDraw = textOverlayImageTop(toBufferedImage(image.getScaledInstance(550, 400, Image.SCALE_SMOOTH)), topText, topColor);
+        imageToDraw = textOverlayImageBottom(toBufferedImage(imageToDraw.getScaledInstance(550, 400, Image.SCALE_SMOOTH)), bottomText, bottomColor);
         g.drawImage(imageToDraw, 0, 0, null);
     }
     
-    private BufferedImage textOverlayImageTop(BufferedImage old, String text){
+    private BufferedImage textOverlayImageTop(BufferedImage old, String text, Color color){
         int w = old.getWidth();
         int h = old.getHeight();
         BufferedImage img = new BufferedImage(
@@ -167,14 +190,14 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
         g2d.setFont(new Font("Arial", Font.BOLD, 40));
         FontMetrics fm = g2d.getFontMetrics();
         
-        return textOverlay(old,text,0,fm.getHeight());
+        return textOverlay(old,text,color,0,fm.getHeight());
     }
     
-    private BufferedImage textOverlayImageBottom(BufferedImage old, String text){
-        return textOverlay(old,text,0,370);
+    private BufferedImage textOverlayImageBottom(BufferedImage old, String text, Color color){
+        return textOverlay(old,text,color,0,370);
     }
     
-    private BufferedImage textOverlay(BufferedImage old, String text, int x, int y){
+    private BufferedImage textOverlay(BufferedImage old, String text, Color color, int x, int y){
         int w = old.getWidth();
         int h = old.getHeight();
         
@@ -196,7 +219,7 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
         g2d.drawString(text, start + ShiftWest(x, 1), ShiftSouth(y, 1));
         g2d.drawString(text, start + ShiftEast(x, 1), ShiftNorth(y, 1));
         g2d.drawString(text, start + ShiftEast(x, 1), ShiftSouth(y, 1));
-        g2d.setColor(Color.white);
+        g2d.setColor(color);
         g2d.drawString(text, start + x, y);
         g2d.dispose();
         return img;
@@ -263,6 +286,8 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
             setBottomText("");
             topTextFieldHolder.setText("");
             bottomTextFieldHolder.setText("");
+            setTopTextColor(Color.white);
+            setBottomTextColor(Color.white);
         } else if (e.getSource() == saveButtonHolder){
             JFileChooser fileChooser = new JFileChooser();
             javax.swing.filechooser.FileFilter ff = new javax.swing.filechooser.FileFilter() {
@@ -292,6 +317,21 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
             for (JButton mButton : memeButtonsHolder){
                 if (e.getSource() == mButton){
                     setImage("images/" + mButton.getName() + ".png");
+                    return;
+                }
+            }
+            
+            for (int i = 0; i < 5; i++){ // Top Text colors
+                if (e.getSource() == colorButtonsHolder[i]){ // Top Colors
+                    setTopTextColor(colorButtonsHolder[i].getBackground());
+                    return;
+                }
+            }
+            
+            for (int i = 5; i < 10; i++){ // Top Text colors
+                if (e.getSource() == colorButtonsHolder[i]){ // Top Colors
+                    setBottomTextColor(colorButtonsHolder[i].getBackground());
+                    return;
                 }
             }
         }
