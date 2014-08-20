@@ -103,10 +103,11 @@ public class Memeator extends JFrame implements DropTargetListener {
     
 }
 
-class ImagePanel extends JPanel {
+class ImagePanel extends JPanel  implements DropTargetListener {
     private BufferedImage image;
 
     public ImagePanel(String imageFile) {
+       enableDragAndDrop();
        try {                
           image = ImageIO.read(new File(imageFile));
        } catch (IOException ex) {
@@ -115,6 +116,7 @@ class ImagePanel extends JPanel {
     }
     
     public ImagePanel(){
+        enableDragAndDrop();
         try {                
             image = ImageIO.read(new File("drop.jpg"));
          } catch (IOException ex) {
@@ -200,5 +202,41 @@ class ImagePanel extends JPanel {
     }
     int ShiftWest(int p, int distance) {
         return (p - distance);
+    }
+    
+    private void enableDragAndDrop(){
+        DropTarget target = new DropTarget(this,this);
+    }
+
+    @Override
+    public void dragEnter(DropTargetDragEvent dtde) {}
+
+    @Override
+    public void dragOver(DropTargetDragEvent dtde) {}
+
+    @Override
+    public void dropActionChanged(DropTargetDragEvent dtde) {}
+
+    @Override
+    public void dragExit(DropTargetEvent dte) {}
+
+    @Override
+    public void drop(DropTargetDropEvent dtde) {
+        try {
+            // Accept the drop first, important!
+            dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+            
+            // Get the files that are dropped as java.util.List
+            java.util.List list = (java.util.List) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
+            
+            // Now get the first file from the list
+            File file=(File)list.get(0);
+            //jt.read(new FileReader(file),null);
+            //jt.setText(file.getPath());
+            //JOptionPane.showMessageDialog(null, "The file location is " + file.getPath());
+            this.setImage(file.getPath());
+        } catch (UnsupportedFlavorException | IOException ex){
+            
+        }
     }
 }
