@@ -22,19 +22,31 @@ import java.awt.dnd.DropTargetDragEvent;
 import java.awt.dnd.DropTargetDropEvent;
 import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.image.BufferedImage;
+import java.awt.image.ImageFilter;
 import java.io.File;
+import java.io.FileFilter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 import javax.imageio.ImageIO;
+import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
+import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import sun.awt.image.codec.JPEGImageEncoderImpl;
 
 /**
  *
  * @author bintoy
  */
-public class Memeator extends JFrame implements DropTargetListener {
+public class Memeator extends JFrame {
     private JTextArea jt;
     private ImagePanel iPanel;
     
@@ -49,76 +61,47 @@ public class Memeator extends JFrame implements DropTargetListener {
         iPanel.setMaximumSize(new Dimension(800, 800));
         add(iPanel);
         
-        enableDragAndDrop();
         setLocationRelativeTo(null);
         setSize(800, 800);
         show();
     }
-    
-    private void enableDragAndDrop(){
-        DropTarget target = new DropTarget(this,this);
-    }
-    
-    
-    
-    /**
-     * @param args the command line arguments
-     */
-
-    @Override
-    public void dragEnter(DropTargetDragEvent dtde) {
-    }
-
-    @Override
-    public void dragOver(DropTargetDragEvent dtde) {
-    }
-
-    @Override
-    public void dropActionChanged(DropTargetDragEvent dtde) {
-    }
-
-    @Override
-    public void dragExit(DropTargetEvent dte) {
-    }
-
-    @Override
-    public void drop(DropTargetDropEvent dtde) {
-        try {
-            // Accept the drop first, important!
-            dtde.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
-            
-            // Get the files that are dropped as java.util.List
-            java.util.List list = (java.util.List) dtde.getTransferable().getTransferData(DataFlavor.javaFileListFlavor);
-            
-            // Now get the first file from the list
-            File file=(File)list.get(0);
-            //jt.read(new FileReader(file),null);
-            //jt.setText(file.getPath());
-            //JOptionPane.showMessageDialog(null, "The file location is " + file.getPath());
-            this.iPanel.setImage(file.getPath());
-        } catch (UnsupportedFlavorException | IOException ex){
-            
-        }
-    }
-    
 }
 
-class ImagePanel extends JPanel  implements DropTargetListener {
+class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
     private BufferedImage image;
-
-    public ImagePanel(String imageFile) {
-       enableDragAndDrop();
-       try {                
-          image = ImageIO.read(new File(imageFile));
-       } catch (IOException ex) {
-            // handle exception...
-       }
-    }
+    private BufferedImage imageToDraw;
+    private String topText;
+    private String bottomText;
+    private JTextField topTextFieldHolder;
+    private JTextField bottomTextFieldHolder;
+    private JButton resetButtonHolder;
+    private JButton saveButtonHolder;
     
     public ImagePanel(){
         enableDragAndDrop();
         try {                
             image = ImageIO.read(new File("drop.jpg"));
+            topText = "";
+            bottomText = "";
+         } catch (IOException ex) {
+              // handle exception...
+         }
+    }
+    
+    public ImagePanel(JTextField topTextField, JTextField bottomTextField, JButton resetButton, JButton saveButton){
+        enableDragAndDrop();
+        topTextField.addActionListener(this);
+        bottomTextField.addActionListener(this);
+        resetButton.addActionListener(this);
+        saveButton.addActionListener(this);
+        topTextFieldHolder = topTextField;
+        bottomTextFieldHolder = bottomTextField;
+        resetButtonHolder = resetButton;
+        saveButtonHolder = saveButton;
+        try {                
+            image = ImageIO.read(new File("drop.jpg"));
+            topText = "";
+            bottomText = "";
          } catch (IOException ex) {
               // handle exception...
          }
@@ -131,6 +114,18 @@ class ImagePanel extends JPanel  implements DropTargetListener {
               // handle exception...
          }
         
+        this.repaint();
+        this.revalidate();
+    }
+    
+    public void setTopText(String text){
+        topText = text;
+        this.repaint();
+        this.revalidate();
+    }
+    
+    public void setBottomText(String text){
+        bottomText = text;
         this.repaint();
         this.revalidate();
     }
@@ -156,11 +151,12 @@ class ImagePanel extends JPanel  implements DropTargetListener {
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
         //g.drawImage(image, 0, 0, null); // see javadoc for more info on the parameters ;
-        image = textOverlayImage(toBufferedImage(image.getScaledInstance(550, -1, Image.SCALE_SMOOTH)), "Gwapo si Edsil?");
-        g.drawImage(image, 0, 0, null);
+        imageToDraw = textOverlayImageTop(toBufferedImage(image.getScaledInstance(550, 400, Image.SCALE_SMOOTH)), topText);
+        imageToDraw = textOverlayImageBottom(toBufferedImage(imageToDraw.getScaledInstance(550, 400, Image.SCALE_SMOOTH)), bottomText);
+        g.drawImage(imageToDraw, 0, 0, null);
     }
     
-    private BufferedImage textOverlayImage(BufferedImage old, String text){
+    private BufferedImage textOverlayImageTop(BufferedImage old, String text){
         int w = old.getWidth();
         int h = old.getHeight();
         
@@ -176,6 +172,37 @@ class ImagePanel extends JPanel  implements DropTargetListener {
         
         int x = 0;
         int y = fm.getHeight();
+        
+        int stringLen = (int)  g2d.getFontMetrics().getStringBounds(text, g2d).getWidth();  
+        int start = 250 - stringLen/2;
+
+        g2d.setColor(Color.black);
+        g2d.drawString(text, start + ShiftWest(x, 1), ShiftNorth(y, 1));
+        g2d.drawString(text, start + ShiftWest(x, 1), ShiftSouth(y, 1));
+        g2d.drawString(text, start + ShiftEast(x, 1), ShiftNorth(y, 1));
+        g2d.drawString(text, start + ShiftEast(x, 1), ShiftSouth(y, 1));
+        g2d.setColor(Color.white);
+        g2d.drawString(text, start + x, y);
+        g2d.dispose();
+        return img;
+    }
+    
+    private BufferedImage textOverlayImageBottom(BufferedImage old, String text){
+        int w = old.getWidth();
+        int h = old.getHeight();
+        
+        BufferedImage img = new BufferedImage(
+            w, h, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2d = img.createGraphics();
+        
+        
+        g2d.drawImage(old, 0, 0, null);
+        
+        g2d.setFont(new Font("Arial", Font.BOLD, 40));
+        FontMetrics fm = g2d.getFontMetrics();
+        
+        int x = 0;
+        int y = 370;
         
         int stringLen = (int)  g2d.getFontMetrics().getStringBounds(text, g2d).getWidth();  
         int start = 250 - stringLen/2;
@@ -237,6 +264,43 @@ class ImagePanel extends JPanel  implements DropTargetListener {
             this.setImage(file.getPath());
         } catch (UnsupportedFlavorException | IOException ex){
             
+        }
+    }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == topTextFieldHolder){
+            setTopText(topTextFieldHolder.getText());
+        } else if (e.getSource() == bottomTextFieldHolder){
+            setBottomText(bottomTextFieldHolder.getText());
+        } else if (e.getSource() == resetButtonHolder){
+            setImage("drop.jpg");
+            setTopText("");
+            setBottomText("");
+        } else if (e.getSource() == saveButtonHolder){
+            JFileChooser fileChooser = new JFileChooser();
+            javax.swing.filechooser.FileFilter ff = new javax.swing.filechooser.FileFilter() {
+                @Override
+                public String getDescription() {
+                    return "png";
+                }
+
+                @Override
+                public boolean accept(File f) {return true;}
+            };
+            fileChooser.addChoosableFileFilter(ff);
+            fileChooser.setFileFilter(ff);
+            if (fileChooser.showSaveDialog(this) == JFileChooser.APPROVE_OPTION) {
+              File file = fileChooser.getSelectedFile();
+              // save to file
+              //JOptionPane.showMessageDialog(null, file.getPath());
+              File outputfile = new File(file.getPath()+".png");
+                try {
+                    ImageIO.write(imageToDraw, "png", outputfile);
+                    JOptionPane.showMessageDialog(null, "File Successfully Saved!");
+                } catch (IOException ex) {
+                }
+            }
         }
     }
 }
