@@ -24,6 +24,8 @@ import java.awt.dnd.DropTargetEvent;
 import java.awt.dnd.DropTargetListener;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.KeyEvent;
+import java.awt.event.KeyListener;
 import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
@@ -61,7 +63,7 @@ public class Memeator extends JFrame {
     }
 }
 
-class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
+class ImagePanel extends JPanel  implements DropTargetListener, ActionListener, KeyListener{
     private BufferedImage image;
     private BufferedImage imageToDraw;
     private String topText;
@@ -91,6 +93,8 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
         enableDragAndDrop();
         topTextField.addActionListener(this);
         bottomTextField.addActionListener(this);
+        topTextField.addKeyListener(this);
+        bottomTextField.addKeyListener(this);
         resetButton.addActionListener(this);
         saveButton.addActionListener(this);
         topTextFieldHolder = topTextField;
@@ -208,7 +212,14 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
         
         g2d.drawImage(old, 0, 0, null);
         
-        g2d.setFont(new Font("Arial", Font.BOLD, 40));
+        int textCount = text.length();
+        int fontSize = 43 - ( (textCount - 16) / 2 ) * 3;
+        
+        // Font Size Algorithm
+        
+        
+        
+        g2d.setFont(new Font("Arial", Font.BOLD, fontSize));
         FontMetrics fm = g2d.getFontMetrics();
         
         int stringLen = (int)  g2d.getFontMetrics().getStringBounds(text, g2d).getWidth();  
@@ -336,6 +347,24 @@ class ImagePanel extends JPanel  implements DropTargetListener, ActionListener{
             }
         }
         
+    }
+
+    @Override
+    public void keyTyped(KeyEvent e) {
+        setTopText(topTextFieldHolder.getText());
+        setBottomText(bottomTextFieldHolder.getText());
+    }
+
+    @Override
+    public void keyPressed(KeyEvent e) {
+        setTopText(topTextFieldHolder.getText());
+        setBottomText(bottomTextFieldHolder.getText());
+    }
+
+    @Override
+    public void keyReleased(KeyEvent e) {
+        setTopText(topTextFieldHolder.getText());
+        setBottomText(bottomTextFieldHolder.getText());
     }
 
 }
