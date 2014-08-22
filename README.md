@@ -6,4 +6,4 @@ The ultimate meme creator to troll your friends!
 
 Screenshot
 ----------
-![Screenshot](http://imgur.com/delete/jHU8suyzFH6wp1U)
+![Screenshot](http://i.imgur.com/LmM8BQu.jpg)
